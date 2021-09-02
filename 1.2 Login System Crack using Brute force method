@@ -1,0 +1,86 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+#define PW_LENGTH 4
+
+
+int main() {
+    cout<<"Welcome to out Portal. Select any of the options below"<<endl;
+    cout<<"Press 1 if Existing User"<<endl;
+    cout<<"Press 2 if New User"<<endl;
+    cout<<"Press 3 for Brute force password breakdown"<<endl;
+    int temp;
+    cin>>temp;
+    string username;
+    cout << "Enter your username: ";
+    getline(cin>>ws, username);
+    int password;
+    bool input= false;
+    while(!input && temp !=3){
+        cout<<"Enter 4 digit Password: ";
+        cin>>password;
+        if(password>999 && password<10000){
+            input=true;
+        }
+        else{
+            cout<<"**********  Wrong Input, Please enter valid 4 digit Pin number between 1000 & 9999 *********"<<endl;
+        }
+    }
+    // ********* If there is new user and he wants to register *********
+    if(temp == 2) {
+        ofstream Myfile("Database.txt", std::ios_base::app);
+        Myfile << username << endl << password << endl << endl;
+        cout<<"User Created"<<endl;
+    }
+    // ************ Existing User login ******************
+    else if (temp ==1 ){
+        ifstream Myfile("Database.txt", std::ios::in);
+        if(Myfile.is_open()){
+            string text;
+            while(getline(Myfile,text)){
+                if(text == username){
+                    string db_pw;
+                    string password2 = to_string(password);
+                    getline(Myfile,db_pw);
+                    //cout<<db_pw<<" Mera wala"<<db_pw.size()<<endl;
+                    if(db_pw == password2){
+                        cout<<"\t Logged IN!! Welcome to your Profile. Hows you doing "<<username<<endl;
+                    }
+                    else{
+                        cout<<"Oops!!! Invalid password or username!!!"<<endl;
+                    }
+                }
+            }
+        }
+    }
+    //************* If someone wants to crack the pincode************
+    else if(temp == 3){
+        ifstream Myfile("Database.txt", std::ios::in);
+        if(Myfile.is_open()){
+            string text;
+            while(getline(Myfile,text)){
+                if(text == username){
+                    string db_pw;
+                    string password2 = to_string(password);
+                    getline(Myfile,db_pw);
+                    //cout<<db_pw<<" Mera wala"<<db_pw.size()<<endl;
+                    if(db_pw == password2){
+                        cout<<"password you type is the password itself. YOU ARE LUCKY TODAY"<<endl;
+                    }
+                    else{
+                        int int_pw;
+                        for(int i=1000;i<10000;i++){
+                            if(db_pw ==to_string(i)){
+                                int_pw = i;
+                            }
+                        }
+                        cout<<"BRUTE FORCE CRACK !!! Password is "<<int_pw<<"!!! ENJOY BUDDY"<<endl;
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
