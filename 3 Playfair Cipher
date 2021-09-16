@@ -1,0 +1,156 @@
+#include <iostream>
+#include<unordered_map>
+#include<utility>
+#include<stdlib.h>
+#include<vector>
+#include<time.h>
+using namespace std;
+
+string encrypt(string plaintext, char arr[5][5], unordered_map<char,pair<int,int> > um){
+    vector<pair<char, char> > v;
+    for(int i=1;i<plaintext.size();i++){
+        if(plaintext[i-1] != plaintext[i]){
+            v.push_back(make_pair(plaintext[i-1],plaintext[i]));
+            i++;
+            if(plaintext.size()%2==0 && i+1>=plaintext.size() ){
+                srand(time(0));
+                int temp = rand()%26;
+                while(char('a' + temp) == plaintext[i-1]){
+                    temp = rand()%26;
+                }
+                v.push_back(make_pair(plaintext[plaintext.size()-1],char('a' +temp)));
+            }
+        }
+        else if(plaintext[i-1] == plaintext[i]){
+            srand(time(0));
+            int temp = rand()%26;
+            while(char('a' + temp) == plaintext[i-1]){
+                temp = rand()%26;
+            }
+            v.push_back(make_pair(plaintext[i-1],char('a' +temp)));
+        }
+    }
+
+    cout<<"Pair in the given plain text will be: ";
+    for(auto u:v){                                          //Print the pair values it taking
+        cout<<u.first<<" "<<u.second<<endl;
+    }
+
+    string coded;
+    for(auto u:v){
+        if(um[u.first].first == um[u.second].first){        //Same Row
+            if(um[u.first].second + 1 >=5){                     // first letter of plaintext
+                coded +=arr[um[u.first].first][0];
+                //cout<<coded<<"j "<<endl;
+            }
+            else{
+                coded +=arr[um[u.first].first][um[u.first].second + 1];
+                //cout<<coded<<"k "<<endl;
+            }
+            if(um[u.second].second + 1 >=5){                     // Second letter of plaintext
+                coded +=arr[um[u.second].first][0];
+                //cout<<coded<<"l "<<endl;
+            }
+            else{
+                coded +=arr[um[u.second].first][um[u.second].second + 1];
+                //cout<<coded<<"m "<<endl;
+            }
+
+        }
+        else if(um[u.first].second == um[u.second].second){  //Same Column
+            if(um[u.first].first + 1 >= 5){
+                coded += arr[0][um[u.first].second];
+                //cout<<coded<<"n "<<endl;
+            }
+            else{
+                coded = arr[um[u.first].first+1][um[u.first].second];
+                //cout<<coded<<"o "<<endl;
+            }
+            if(um[u.second].first + 1 >= 5){
+                coded += arr[0][um[u.second].second];
+                //cout<<coded<<"p "<<endl;
+            }
+            else{
+                coded = arr[um[u.second].first+1][um[u.second].second];
+                //cout<<coded<<"q "<<endl;
+            }
+        }
+        else{                                                 // No Same Column or Row, therefore in reactangle
+            coded += arr[um[u.first].first][um[u.second].second];
+            coded += arr[um[u.second].first][um[u.first].second];
+        }
+    }
+    return coded;
+}
+
+int last(int *filled){
+    for(int i=0;i<26;i++){
+        if(filled[i]==0 && i!=9){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int grid(int n, char arr[5][5], string keyword,int filled[]){
+    int count=0;
+    for(int i=0;i<5;i++){
+        for(int j=0;j<5;j++){
+            if(count<n) {
+                arr[i][j] = keyword[count];
+                filled[keyword[count]-'a'] = 1;
+                count++;
+            }
+            else if(count==n){
+                int temp;
+                temp = last(filled);
+                arr[i][j] = char('a' + temp);
+                filled[temp]++;
+            }
+        }
+    }
+    return 0;
+}
+
+int main(){
+    string keyword;
+    cout<<"Enter Keyword: ";
+    cin >> keyword;
+    string plaintext;
+    cout<<"Enter Plaintext: ";
+    cin >> plaintext;
+    int n=keyword.size();
+    char arr[5][5];
+    int filled[26];
+    for(int i=0;i<26;i++){
+        filled[i] = 0;
+    }
+    grid(n,arr,keyword,filled);
+
+    // Print the grid (for Debugging)
+    for(int i=0;i<5;i++){
+        for(int j=0;j<5;j++){
+            cout<<arr[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+
+    //Print filled array (for Debugging)
+    /*
+     for(int i=0;i<26;i++){
+        cout<<filled[i]<<" ";
+    }
+     */
+
+    // Treating plain text
+    unordered_map<char,pair<int,int> > um;
+    for(int i=0;i<5;i++){
+        for(int j=0;j<5;j++){
+            um[arr[i][j]] = make_pair(i,j);
+        }
+    }
+    //um['j'] = make_pair(2,3);
+    string coded = encrypt(plaintext,arr,um);
+    cout<<"Coded String: "<<coded<<endl;
+    return 0;
+}
